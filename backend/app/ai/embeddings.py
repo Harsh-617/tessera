@@ -7,17 +7,17 @@ client = genai.Client(api_key=settings.GEMINI_API_KEY)
 def generate_embedding(text: str) -> list[float]:
     """
     Generates a 768-dimensional embedding for the given text
-    using the text-embedding-004 model.
+    using the gemini-embedding-001 model.
     """
     if not text:
         return []
     try:
         result = client.models.embed_content(
-            model="models/text-embedding-004",
+            model="gemini-embedding-001",
             contents=text,
-            config=types.EmbedContentConfig(task_type="SEMANTIC_SIMILARITY")
+            config=types.EmbedContentConfig(task_type="SEMANTIC_SIMILARITY", output_dimensionality=768)
         )
-        return result.embeddings[0].values
+        return [float(v) for v in result.embeddings[0].values]
     except Exception as e:
         print(f"Error generating embedding: {e}")
         return []
@@ -40,3 +40,11 @@ Industry: {profile_data.get('industry')}
 Stage: {profile_data.get('stage')}
 Description: {profile_data.get('description')}
 Support needed: {', '.join(profile_data.get('support_needed') or [])}""".strip()
+
+def generate_mentor_embedding(profile: dict) -> list[float]:
+    """Convenience helper used by seed/profile routes."""
+    return generate_embedding(format_mentor_text(profile))
+
+def generate_startup_embedding(profile: dict) -> list[float]:
+    """Convenience helper used by seed/profile routes."""
+    return generate_embedding(format_startup_text(profile))

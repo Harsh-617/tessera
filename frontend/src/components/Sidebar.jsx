@@ -5,20 +5,20 @@ import { useAuth } from '../hooks/useAuth'
 
 const ADMIN_NAV = [
   { label: 'Dashboard', path: '/admin/dashboard', icon: 'dashboard' },
-  { label: 'Mentors', path: '/admin/actors', icon: 'diversity_3' },
-  { label: 'Startups', path: '/admin/actors', icon: 'rocket_launch' },
-  { label: 'Matches', path: '/admin/programmes', icon: 'handshake' },
-  { label: 'Analytics', path: '/admin/dna', icon: 'analytics' },
+  { label: 'Mentors',   path: '/admin/actors',    icon: 'diversity_3' },
+  { label: 'Startups',  path: '/admin/actors',    icon: 'rocket_launch' },
+  { label: 'Matches',   path: '/admin/programmes', icon: 'handshake' },
+  { label: 'Analytics', path: '/admin/dna',        icon: 'analytics' },
 ]
 
 const MENTOR_NAV = [
-  { label: 'My Links', path: '/mentor', icon: 'handshake' },
-  { label: 'Profile', path: '/mentor/profile', icon: 'person' },
+  { label: 'My Links', path: '/mentor',         icon: 'handshake' },
+  { label: 'Profile',  path: '/mentor/profile', icon: 'person' },
 ]
 
 const STARTUP_NAV = [
-  { label: 'My Links', path: '/startup', icon: 'handshake' },
-  { label: 'Profile', path: '/startup/profile', icon: 'person' },
+  { label: 'My Links', path: '/startup',         icon: 'handshake' },
+  { label: 'Profile',  path: '/startup/profile', icon: 'person' },
 ]
 
 const NAV_BY_ROLE = { admin: ADMIN_NAV, mentor: MENTOR_NAV, startup: STARTUP_NAV }
@@ -34,7 +34,7 @@ export default function Sidebar() {
   }
 
   return (
-    <nav className="fixed left-0 top-0 h-full w-sidebar-width bg-surface-container-lowest border-r border-outline-variant flex flex-col gap-element-gap py-container-padding z-20">
+    <nav className="animate-slide-in-left fixed left-0 top-0 h-full w-sidebar-width bg-surface-container-lowest border-r border-outline-variant flex flex-col gap-element-gap py-container-padding z-20">
       <div className="px-4 mb-4">
         <h1 className="text-title-lg font-black text-on-background tracking-tighter">tessera</h1>
         <p className="text-label-sm text-on-surface-variant mt-1">AI Mentor Hub</p>
@@ -73,7 +73,7 @@ export default function Sidebar() {
         </a>
         <button
           onClick={handleSignOut}
-          className="text-on-surface-variant hover:text-on-surface flex items-center px-4 py-2 text-body-md hover:bg-surface-container transition-all duration-150 rounded w-full text-left"
+          className="btn-active text-on-surface-variant hover:text-on-surface flex items-center px-4 py-2 text-body-md hover:bg-surface-container transition-all duration-150 rounded w-full text-left"
         >
           <span className="material-symbols-outlined mr-3 text-[20px]">logout</span>
           Logout

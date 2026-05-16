@@ -92,7 +92,7 @@ def generate_matches(startup_id, programme_id, db: Session) -> list[dict]:
             }),
             dna_blueprint=best_blueprint.pattern_summary if best_blueprint else "No relevant historical pattern found."
         )
-        response = client.models.generate_content(model="gemini-1.5-flash", contents=prompt)
+        response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
         reasoning = response.text.strip()
 
         candidates.append({

@@ -7,3 +7,79 @@
 .border-linear { border-color: #1f1f1f; }
 .bg-linear-surface { background-color: #111111; }
 .bg-linear-hover { background-color: #161616; }
+
+/* ── Keyframes ── */
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulseSubtle {
+  0%   { box-shadow: 0 0 0 0   rgba(192, 193, 255, 0.4); }
+  70%  { box-shadow: 0 0 0 6px rgba(192, 193, 255, 0);   }
+  100% { box-shadow: 0 0 0 0   rgba(192, 193, 255, 0);   }
+}
+
+/* ── Animation classes ── */
+.animate-slide-in-left {
+  animation: slideInLeft 0.5s ease-out forwards;
+}
+
+.animate-slide-up-fade {
+  opacity: 0;
+  animation: slideUpFade 0.6s ease-out forwards;
+}
+
+.animate-fade-in {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-out 0.4s forwards;
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+
+/* ── Micro-interactions ── */
+.btn-active:active { transform: scale(0.98); }
+
+.hover-card-effect {
+  transition: border-color 0.3s ease, filter 0.3s ease;
+}
+.hover-card-effect:hover {
+  border-color: #464554;
+  filter: brightness(1.05);
+}
+
+.check-in-item { transition: background-color 0.2s ease; }
+.check-in-item:hover { background-color: #161616; }
+
+/* ── Gauge ── */
+.gauge-circle {
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Tab indicator ── */
+.tab-indicator {
+  position: absolute;
+  bottom: -1px;
+  height: 2px;
+  background-color: #c0c1ff;
+  transition: left 0.3s ease, width 0.3s ease;
+}
+
+/* ── Status dot ── */
+.status-dot { animation: pulseSubtle 2s infinite; }
+
+/* ── Tab crossfade ── */
+.tab-pane { transition: opacity 0.3s ease; }
+.tab-pane.fade-out { opacity: 0; }

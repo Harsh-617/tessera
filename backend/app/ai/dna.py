@@ -64,7 +64,7 @@ def extract_dna_blueprint(link_id: str, db: Session):
     )
 
     response = client.models.generate_content(
-        model="gemini-1.5-flash",
+        model="gemini-2.5-flash",
         contents=prompt
     )
     pattern_summary = response.text.strip()

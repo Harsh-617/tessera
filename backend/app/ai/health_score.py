@@ -1,66 +1,42 @@
-from datetime import date
+from datetime import datetime
 
-def calculate_health_score(checkins: list, milestones: list) -> tuple[float, str]:
-    """
-    Calculates the health score (0-100) and status string for a relationship.
-    
-    Logic:
-    - Base score: 100
-    - Deductions:
-        - > 7 days since last check-in: -5 per extra day beyond 7
-        - > 14 days since last check-in: force status = at_risk
-        - each overdue milestone: -15
-    - Additions:
-        - check-in this week: +5
-        - milestone completed: +10
-        - session duration > 60 mins: +3
-    """
-    base_score = 100.0
-    status = "healthy"
-    
-    today = date.today()
-    
+
+def calculate_health_score(checkins: list, milestones: list) -> dict:
+    now = datetime.utcnow()
+
     if not checkins:
-        # No activity yet - initial state
-        return 50.0, "warning"
+        days_since_checkin = 999
+    else:
+        last_checkin = max(c["created_at"] for c in checkins)
+        days_since_checkin = (now - last_checkin).total_seconds() / 86400
 
-    # Find the most recent check-in
-    last_checkin_date = max(c.session_date for c in checkins)
-    days_since_last = (today - last_checkin_date).days
-    
-    # Deductions for inactivity
-    if days_since_last > 14:
+    score = 100.0
+
+    if days_since_checkin > 7:
+        score -= 5 * (days_since_checkin - 7)
+
+    overdue_count = sum(1 for m in milestones if m["status"] == "overdue")
+    score -= overdue_count * 15
+
+    checkin_this_week = any(
+        (now - c["created_at"]).total_seconds() / 86400 <= 7 for c in checkins
+    )
+    if checkin_this_week:
+        score += 5
+
+    completed_count = sum(1 for m in milestones if m["status"] == "completed")
+    score += completed_count * 10
+
+    if any(c["duration_minutes"] > 60 for c in checkins):
+        score += 3
+
+    score = max(0.0, min(100.0, score))
+
+    if days_since_checkin > 14 or score < 40:
         status = "at_risk"
-        base_score -= 50 # Heavy penalty
-    elif days_since_last > 7:
-        base_score -= (days_since_last - 7) * 5
-        
-    # Bonus for recent activity
-    if days_since_last <= 7:
-        base_score += 5
-        
-    # Milestone impact
-    for m in milestones:
-        if m.status.value == "overdue":
-            base_score -= 15
-        elif m.status.value == "completed":
-            base_score += 10
-            
-    # Session duration quality bonus
-    for c in checkins:
-        if c.duration_minutes > 60:
-            base_score += 3
-            
-    # Ensure score is within 0-100 bounds
-    score = float(max(0.0, min(100.0, base_score)))
-    
-    # Final status determination (if not already forced to at_risk)
-    if status != "at_risk":
-        if score >= 70:
-            status = "healthy"
-        elif score >= 40:
-            status = "warning"
-        else:
-            status = "at_risk"
-            
-    return score, status
+    elif score >= 70:
+        status = "healthy"
+    else:
+        status = "warning"
+
+    return {"score": score, "status": status}

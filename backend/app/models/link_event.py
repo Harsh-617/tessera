@@ -17,6 +17,7 @@ class LinkEvent(Base):
     link_id = Column(UUID(as_uuid=True), ForeignKey("links.id"), nullable=False)
     from_status = Column(String, nullable=True)
     to_status = Column(String, nullable=False)
-    triggered_by = Column(SQLEnum(TriggeredByEnum), nullable=False)
+    triggered_by = Column(SQLEnum(TriggeredByEnum, name="link_trigger_source"), nullable=False)
     reason = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
