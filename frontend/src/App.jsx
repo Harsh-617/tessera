@@ -14,7 +14,9 @@ import Programmes from './pages/admin/Programmes'
 import ProgrammeDetail from './pages/admin/ProgrammeDetail'
 import ProgrammeSetup from './pages/admin/ProgrammeSetup'
 import DnaLibrary from './pages/admin/DnaLibrary'
+import DnaDetail from './pages/admin/DnaDetail'
 import Actors from './pages/admin/Actors'
+import ActorDetail from './pages/admin/ActorDetail'
 
 import MentorHome from './pages/mentor/MentorHome'
 import MentorLinkDetail from './pages/mentor/LinkDetail'
@@ -70,7 +72,9 @@ export default function App() {
       <Route path="/admin/programmes/new" element={<ProtectedRoute allowedRoles={['admin']}><ProgrammeSetup /></ProtectedRoute>} />
       <Route path="/admin/programmes/:id" element={<ProtectedRoute allowedRoles={['admin']}><ProgrammeDetail /></ProtectedRoute>} />
       <Route path="/admin/dna" element={<ProtectedRoute allowedRoles={['admin']}><DnaLibrary /></ProtectedRoute>} />
+      <Route path="/admin/dna/:id" element={<ProtectedRoute allowedRoles={['admin']}><DnaDetail /></ProtectedRoute>} />
       <Route path="/admin/actors" element={<ProtectedRoute allowedRoles={['admin']}><Actors /></ProtectedRoute>} />
+      <Route path="/admin/actors/:id" element={<ProtectedRoute allowedRoles={['admin']}><ActorDetail /></ProtectedRoute>} />
 
       <Route path="/mentor" element={<ProtectedRoute allowedRoles={['mentor']}><MentorHome /></ProtectedRoute>} />
       <Route path="/mentor/links/:id" element={<ProtectedRoute allowedRoles={['mentor']}><MentorLinkDetail /></ProtectedRoute>} />

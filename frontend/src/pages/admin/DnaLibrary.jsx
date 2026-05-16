@@ -169,6 +169,7 @@ export default function DnaLibrary() {
           {filtered.map(b => (
             <article
               key={b.id}
+              onClick={() => navigate(`/admin/dna/${b.id}`)}
               className="rounded-2xl border border-[#232327] p-[22px] flex flex-col gap-4 relative overflow-hidden cursor-pointer transition-all duration-200"
               style={cardBg}
               onMouseEnter={e => { e.currentTarget.style.borderColor = '#3a3a40'; e.currentTarget.style.transform = 'translateY(-2px)' }}

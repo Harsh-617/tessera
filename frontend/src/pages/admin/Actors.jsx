@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Sidebar from '../../components/Sidebar'
 import api from '../../services/api'
 
@@ -34,6 +35,7 @@ const INDUSTRIES = ['Fintech', 'Healthtech', 'SaaS', 'Deeptech', 'Agritech', 'E-
 const COUNTRIES  = ['Malaysia', 'Singapore', 'Indonesia']
 
 export default function Actors() {
+  const navigate = useNavigate()
   const [actors, setActors] = useState(MOCK_ACTORS)
   const [tab, setTab]       = useState('all')
   const [search, setSearch] = useState('')
@@ -171,6 +173,7 @@ export default function Actors() {
                     key={a.id ?? a.user_id}
                     className="cursor-pointer transition-colors"
                     style={{ borderBottom: i < filtered.length - 1 ? '1px solid #232327' : 'none' }}
+                    onClick={() => navigate(`/admin/actors/${a.id ?? a.user_id}`)}
                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
