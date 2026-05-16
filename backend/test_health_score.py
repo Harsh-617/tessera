@@ -5,8 +5,8 @@ now = datetime.utcnow()
 
 
 def run(label, checkins, milestones):
-    result = calculate_health_score(checkins, milestones)
-    print(f"[{label}]  score={result['score']:.1f}  status={result['status']}")
+    score, status = calculate_health_score(checkins, milestones)
+    print(f"[{label}]  score={score:.1f}  status={status}")
 
 
 # 1. Healthy — check-in 3 days ago (90 min), 2 completed milestones
