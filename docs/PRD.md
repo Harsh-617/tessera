@@ -302,7 +302,7 @@ Long-term features that extend the platform's scope.
 | Auth verification | firebase-admin SDK | Verify Firebase tokens in FastAPI |
 | Async jobs | FastAPI BackgroundTasks | DNA extraction, embedding generation |
 | Database | Cloud SQL — PostgreSQL + pgvector | All structured data + vector embeddings |
-| AI embeddings | Gemini API — text-embedding-004 | Profile and DNA blueprint embeddings (768-dim) |
+| AI embeddings | Gemini API — text-embedding-004 | Profile and DNA blueprint embeddings (3072-dim) |
 | Vector search | pgvector cosine similarity | Find closest mentor embeddings to startup |
 | LLM | Gemini 1.5 Flash | Match reasoning, DNA extraction, health narratives |
 | AI SDK | google-generativeai (Python) | Single package for all Gemini calls |
@@ -360,7 +360,7 @@ Proceeds with role-based access control
 | availability_hours | INTEGER | Hours per month |
 | mentoring_style | TEXT | Embedded for matching |
 | linkedin_url | VARCHAR | Admin reference only |
-| embedding | VECTOR(768) | AI-generated from text fields |
+| embedding | VECTOR(3072) | AI-generated from text fields |
 | updated_at | TIMESTAMP | Triggers re-embedding on change |
 
 **Embedding input text format:**
@@ -388,7 +388,7 @@ Mentoring style: {mentoring_style}
 | founded_year | INTEGER | |
 | support_needed | VARCHAR[] | Array: fundraising, product, market access, tech |
 | website | VARCHAR | Admin reference |
-| embedding | VECTOR(768) | AI-generated from text fields |
+| embedding | VECTOR(3072) | AI-generated from text fields |
 | updated_at | TIMESTAMP | Triggers re-embedding on change |
 
 **Embedding input text format:**
@@ -495,7 +495,7 @@ Support needed: {support_needed joined}
 | relationship_stats | JSONB | Total check-ins, avg duration, milestones completed, relationship duration |
 | outcome_metrics | JSONB | Funding raised, milestones hit, programme goals achieved |
 | pattern_summary | TEXT | AI-generated paragraph — what made this work |
-| embedding | VECTOR(768) | Embedding of pattern_summary — used for DNA matching |
+| embedding | VECTOR(3072) | Embedding of pattern_summary — used for DNA matching |
 | created_at | TIMESTAMP | |
 
 ---
@@ -517,7 +517,7 @@ python-dotenv          # Env vars
 
 - Takes a formatted profile text string
 - Calls `text-embedding-004` via `google-generativeai`
-- Returns a list of 768 floats
+- Returns a list of 3072 floats
 - Called on: mentor profile create/update, startup profile create/update, DNA blueprint creation
 
 ```python
@@ -1024,7 +1024,7 @@ project-root/
 
 **Day 1 morning (start immediately):**
 - Install all 6 libraries: `google-generativeai pgvector psycopg2-binary sqlalchemy numpy python-dotenv`
-- Write and test `embeddings.py` — call text-embedding-004, verify vector is 768 floats
+- Write and test `embeddings.py` — call text-embedding-004, verify vector is 3072 floats
 - Test with a sample mentor profile text string
 
 **Day 1 afternoon:**

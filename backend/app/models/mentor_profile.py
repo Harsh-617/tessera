@@ -20,5 +20,5 @@ class MentorProfile(Base):
     availability_hours = Column(Integer, nullable=True)
     mentoring_style = Column(Text, nullable=True)
     linkedin_url = Column(String, nullable=True)
-    embedding = Column(Vector(768), nullable=True)
+    embedding = Column(Vector(3072), nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -27,5 +27,5 @@ class StartupProfile(Base):
     founded_year = Column(Integer, nullable=True)
     support_needed = Column(ARRAY(String), nullable=True)
     website = Column(String, nullable=True)
-    embedding = Column(Vector(768), nullable=True)
+    embedding = Column(Vector(3072), nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

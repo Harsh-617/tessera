@@ -20,5 +20,5 @@ class DNABlueprint(Base):
     relationship_stats = Column(JSONB, nullable=False)
     outcome_metrics = Column(JSONB, nullable=False)
     pattern_summary = Column(Text, nullable=False)
-    embedding = Column(Vector(768), nullable=False)
+    embedding = Column(Vector(3072), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
