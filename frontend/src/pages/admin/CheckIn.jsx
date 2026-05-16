@@ -1,220 +1,257 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import Sidebar from '../../components/Sidebar'
+
+const C = { green: '#22c55e', amber: '#f59e0b', blue: '#60a5fa' }
+
+const MOCK_LINK = {
+  mentor_name: 'Nurul Huda',
+  startup_name: 'CareLoop',
+  startup_stage: 'MVP',
+  startup_focus: 'MOH pilot approval, regulatory pathway, clinical partnerships in KL',
+  health: 70,
+  sessions: 6,
+  status: 'active',
+}
+
+const SESSION_TYPES = [
+  { id: 'sync',     label: 'Weekly Sync' },
+  { id: 'strategy', label: 'Strategy Call' },
+  { id: 'review',   label: 'Review Session' },
+  { id: 'adhoc',    label: 'Ad-hoc Check-in' },
+]
 
 const MOCK_TIMELINE = [
   {
-    id: 'new',
+    id: '1',
+    type: 'Strategy Call',
+    time: '2 days ago',
+    note: 'Deep dive into MOH pilot documentation requirements. Nurul mapped out the approval pathway timeline — 3 months realistic if submissions are complete by end of June.',
+    author: 'Nurul Huda',
+    fresh: false,
+  },
+  {
+    id: '2',
     type: 'Weekly Sync',
-    time: 'Today, 10:42 AM',
-    note: 'Discussed the Q3 technical roadmap. The team is making good progress on the microservices migration but highlighted a bottleneck in DevOps bandwidth. Advised hiring a dedicated SRE contractor for 3 months.',
-    author: 'Elena R.',
-    isNew: true,
+    time: '9 days ago',
+    note: 'Stakeholder mapping for the two KL pilot clinics. Identified the Head of Nursing as the key internal champion at each site.',
+    author: 'Nurul Huda',
+    fresh: false,
   },
   {
-    id: 'past1',
-    type: 'Code Review Session',
-    time: 'Oct 12, 2023',
-    note: 'Pair programming with lead engineer to refactor the payment processing module. Identified several race conditions.',
-  },
-  {
-    id: 'past2',
-    type: 'Introduction Call',
-    time: 'Sep 28, 2023',
-    note: 'Initial alignment meeting. Set expectations for bi-weekly check-ins and established primary communication channels via Slack.',
+    id: '3',
+    type: 'Weekly Sync',
+    time: '16 days ago',
+    note: 'First structured session. Set 90-day goals: regulatory submission draft, two signed LOIs from pilot clinics, and a warm intro to MOH Digital Health division.',
+    author: 'Nurul Huda',
+    fresh: false,
   },
 ]
 
-export default function CheckIn() {
+export default function AdminCheckIn() {
   const { id } = useParams()
-  const [type, setType] = useState('')
+  const navigate = useNavigate()
+  const [link] = useState(MOCK_LINK)
+  const [timeline, setTimeline] = useState(MOCK_TIMELINE)
+  const [sessionType, setSessionType] = useState('')
   const [notes, setNotes] = useState('')
   const [followUp, setFollowUp] = useState(false)
-  const [showToast, setShowToast] = useState(true)
-  const [timeline, setTimeline] = useState(MOCK_TIMELINE)
-  const [submitted, setSubmitted] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
-  const handleSubmit = () => {
-    if (!type) return
+  const cardBg = { background: 'linear-gradient(180deg, #18181c 0%, #131316 100%)' }
+  const inputCls = 'w-full bg-[#0b0b0c] border border-[#232327] rounded-xl px-3.5 py-2.5 text-[13px] text-[#ededee] placeholder:text-[#5b5b62] focus:border-[#3a3a40] focus:outline-none transition-colors'
+  const labelCls = 'block text-[11px] text-[#5b5b62] tracking-[0.16em] uppercase mb-1.5'
+
+  const handleSubmit = async () => {
+    if (!sessionType) return
+    setSaving(true)
+    await new Promise(r => setTimeout(r, 600))
     const entry = {
       id: Date.now().toString(),
-      type: { sync: 'Weekly Sync', review: 'Code Review', strategy: 'Strategy Call' }[type],
-      time: 'Just Now',
+      type: SESSION_TYPES.find(s => s.id === sessionType)?.label ?? sessionType,
+      time: 'Just now',
       note: notes || '—',
       author: 'Admin',
-      isNew: true,
+      fresh: true,
     }
-    setTimeline([entry, ...timeline.map(t => ({ ...t, isNew: false }))])
-    setSubmitted(true)
-    setShowToast(true)
-    setType('')
+    setTimeline(prev => [entry, ...prev.map(t => ({ ...t, fresh: false }))])
+    setSaved(true)
+    setSaving(false)
+    setSessionType('')
     setNotes('')
     setFollowUp(false)
+    setTimeout(() => setSaved(false), 3500)
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="min-h-screen" style={{ background: '#0b0b0c', color: '#ededee', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      <div className="ds-bg" />
+      <div className="ds-grid" />
       <Sidebar />
-      <main className="flex-1 ml-sidebar-width overflow-y-auto bg-background p-container-padding">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6">
 
-          {/* Header */}
-          <div className="md:col-span-12 flex justify-between items-end mb-2">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Link
-                  to={`/admin/links/${id}`}
-                  className="text-label-caps text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1"
-                >
-                  <span className="material-symbols-outlined text-[14px]">arrow_back</span>
-                  BACK
-                </Link>
-                <span className="text-on-surface-variant text-label-caps">/</span>
-                <span className="text-label-caps text-on-surface-variant">MENTORSHIP SESSION</span>
-                <span className="text-label-caps text-on-surface-variant px-1.5 py-0.5 rounded border border-outline-variant bg-surface">
-                  ACTIVE
-                </span>
-              </div>
-              <h1 className="text-title-lg text-on-surface">Elena Rodriguez / TechNova Inc.</h1>
-            </div>
-          </div>
+      <main className="ml-[240px] min-h-screen relative z-10 p-10 pt-12 page-enter">
 
-          {/* Left Col */}
-          <div className="md:col-span-5 flex flex-col gap-6">
+        {/* Page header */}
+        <header className="mb-8">
+          <button
+            onClick={() => navigate(`/admin/links/${id}`)}
+            className="text-[11px] text-[#5b5b62] tracking-[0.18em] uppercase mb-4 hover:text-[#8a8a92] transition-colors cursor-pointer bg-transparent border-0 p-0 flex items-center gap-1.5"
+          >
+            ← Back to link
+          </button>
+          <div className="text-[11px] text-[#5b5b62] tracking-[0.24em] uppercase mb-2">Admin · Log session</div>
+          <h1 className="font-fraunces font-light text-[#ededee] m-0 leading-tight" style={{ fontSize: 'clamp(28px, 3vw, 40px)', letterSpacing: '-0.03em' }}>
+            {link.mentor_name} × {link.startup_name}
+          </h1>
+          <p className="text-[14px] text-[#8a8a92] mt-2 m-0">
+            Log a session on behalf of this mentorship link. Entries are visible to both the mentor and startup.
+          </p>
+        </header>
 
-            {/* Log Check-in Form */}
-            <div className="bg-surface border border-outline-variant rounded p-4">
-              <h3 className="text-title-md text-on-surface border-b border-outline-variant pb-2 mb-4">Log Check-in</h3>
+        {/* 2-col layout */}
+        <div className="grid gap-5" style={{ gridTemplateColumns: '380px 1fr' }}>
+
+          {/* Left col */}
+          <div className="flex flex-col gap-5">
+
+            {/* Log session form */}
+            <div className="rounded-2xl border border-[#232327] p-6" style={cardBg}>
+              <div className="text-[11px] text-[#5b5b62] tracking-[0.16em] uppercase mb-5">Log session</div>
               <div className="flex flex-col gap-4">
                 <div>
-                  <label className="block text-label-sm text-on-surface-variant mb-1">Type</label>
+                  <label className={labelCls}>Session type</label>
                   <select
-                    value={type}
-                    onChange={e => setType(e.target.value)}
-                    className="w-full bg-surface border border-outline-variant text-on-surface text-body-md rounded h-9 px-3 focus:border-primary focus:outline-none appearance-none"
+                    className={inputCls}
+                    value={sessionType}
+                    onChange={e => setSessionType(e.target.value)}
+                    style={{ appearance: 'none', cursor: 'pointer' }}
                   >
-                    <option value="" disabled>Select interaction type</option>
-                    <option value="sync">Weekly Sync</option>
-                    <option value="review">Code Review</option>
-                    <option value="strategy">Strategy Call</option>
+                    <option value="" disabled className="bg-[#131316]">Select type…</option>
+                    {SESSION_TYPES.map(s => (
+                      <option key={s.id} value={s.id} className="bg-[#131316]">{s.label}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-label-sm text-on-surface-variant mb-1">Notes</label>
+                  <label className={labelCls}>Session notes</label>
                   <textarea
+                    className={`${inputCls} resize-none`}
+                    rows={5}
                     value={notes}
                     onChange={e => setNotes(e.target.value)}
-                    placeholder="Add discussion points..."
-                    className="w-full bg-surface border border-outline-variant text-on-surface text-body-md rounded p-3 min-h-[100px] focus:border-primary focus:outline-none placeholder:text-outline resize-none"
+                    placeholder="Key discussion points, decisions, blockers, next steps."
                   />
+                  <div className="text-[11px] text-[#5b5b62] mt-1.5">{notes.length} characters</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    id="followup"
-                    type="checkbox"
-                    checked={followUp}
-                    onChange={e => setFollowUp(e.target.checked)}
-                    className="w-4 h-4 rounded border-outline-variant bg-surface text-primary focus:ring-0"
-                  />
-                  <label htmlFor="followup" className="text-body-md text-on-surface-variant">Requires follow-up</label>
-                </div>
+                <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                  <div
+                    onClick={() => setFollowUp(f => !f)}
+                    className="w-4 h-4 rounded flex items-center justify-center flex-shrink-0 transition-all cursor-pointer"
+                    style={{
+                      background: followUp ? C.green : 'transparent',
+                      border: `1px solid ${followUp ? C.green : '#3a3a40'}`,
+                    }}
+                  >
+                    {followUp && <span style={{ color: '#0b0b0c', fontSize: 10, lineHeight: 1, fontWeight: 700 }}>✓</span>}
+                  </div>
+                  <span className="text-[13px] text-[#8a8a92]">Requires follow-up</span>
+                </label>
                 <button
                   onClick={handleSubmit}
-                  className="btn-active w-full bg-primary text-[#131313] text-title-md rounded h-9 hover:opacity-90 transition-opacity mt-2"
+                  disabled={!sessionType || saving}
+                  className="h-9 rounded-full text-[13px] font-medium border-0 transition-all mt-1"
+                  style={{
+                    background: saved ? C.green : (!sessionType || saving) ? '#232327' : '#ededee',
+                    color: saved ? '#0b0b0c' : (!sessionType || saving) ? '#5b5b62' : '#0b0b0c',
+                    cursor: !sessionType || saving ? 'not-allowed' : 'pointer',
+                  }}
                 >
-                  Log Entry
+                  {saved ? 'Logged!' : saving ? 'Logging…' : 'Log session'}
                 </button>
               </div>
             </div>
 
-            {/* Startup Context */}
-            <div className="bg-surface border border-outline-variant rounded p-4">
-              <h3 className="text-title-md text-on-surface border-b border-outline-variant pb-2 mb-4">Startup Context</h3>
-              <div className="flex flex-col gap-3">
-                <div>
-                  <span className="block text-label-caps text-on-surface-variant">STAGE</span>
-                  <span className="text-body-md text-on-surface">Series A</span>
-                </div>
-                <div>
-                  <span className="block text-label-caps text-on-surface-variant">CURRENT FOCUS</span>
-                  <span className="text-body-md text-on-surface">Scaling backend infrastructure, Series B prep</span>
-                </div>
+            {/* Link context */}
+            <div className="rounded-2xl border border-[#232327] p-6" style={cardBg}>
+              <div className="text-[11px] text-[#5b5b62] tracking-[0.16em] uppercase mb-4">Link context</div>
+              <div className="flex flex-col gap-0">
+                {[
+                  { k: 'Startup',      v: link.startup_name },
+                  { k: 'Mentor',       v: link.mentor_name },
+                  { k: 'Stage',        v: link.startup_stage },
+                  { k: 'Sessions',     v: link.sessions },
+                  { k: 'Health',       v: link.health, color: C.green },
+                  { k: 'Status',       v: link.status, color: C.green },
+                ].map((r, i, arr) => (
+                  <div key={r.k} className="flex justify-between text-[13px] py-3"
+                    style={{ borderBottom: i < arr.length - 1 ? '1px solid #232327' : 'none' }}>
+                    <span className="text-[#5b5b62]">{r.k}</span>
+                    <span style={{ color: r.color ?? '#ededee' }}>{r.v}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-[#232327]">
+                <div className="text-[11px] text-[#5b5b62] tracking-[0.16em] uppercase mb-2">Current focus</div>
+                <p className="text-[13px] text-[#8a8a92] leading-[1.55] m-0">{link.startup_focus}</p>
               </div>
             </div>
+
           </div>
 
-          {/* Right Col - Activity Feed */}
-          <div className="md:col-span-7 flex flex-col min-h-[600px]">
+          {/* Right col: timeline */}
+          <div className="rounded-2xl border border-[#232327] flex flex-col" style={{ ...cardBg, minHeight: 500 }}>
+            <div className="px-6 py-4 border-b border-[#232327] flex items-center justify-between">
+              <div className="text-[11px] text-[#5b5b62] tracking-[0.16em] uppercase">Activity timeline</div>
+              <div className="text-[12px] text-[#5b5b62]">{timeline.length} entries</div>
+            </div>
+            <div className="p-6 flex-1">
 
-            {/* Success Toast */}
-            {showToast && (
-              <div className="bg-[#052e16] border border-[#22c55e] rounded p-3 mb-4 flex items-start gap-3 relative overflow-hidden">
-                <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-[#22c55e] rounded-full blur-xl opacity-20" />
-                <span className="material-symbols-outlined text-[#22c55e] mt-0.5">check_circle</span>
-                <div>
-                  <p className="text-title-md text-[#f0fdf4]">Check-in logged successfully.</p>
-                  <p className="text-body-md text-[#bbf7d0] opacity-80">Timeline updated.</p>
+              {/* Success banner */}
+              {saved && (
+                <div className="rounded-xl px-4 py-3 mb-6 flex items-start gap-3"
+                  style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                  <span className="text-[13px] mt-px" style={{ color: C.green }}>✓</span>
+                  <div>
+                    <div className="text-[13px] font-medium" style={{ color: C.green }}>Session logged</div>
+                    <div className="text-[12px] text-[#8a8a92] mt-0.5">Timeline updated for both mentor and startup.</div>
+                  </div>
                 </div>
-                <button
-                  onClick={() => setShowToast(false)}
-                  className="ml-auto text-[#22c55e] hover:text-[#f0fdf4] transition-colors"
-                >
-                  <span className="material-symbols-outlined">close</span>
-                </button>
-              </div>
-            )}
+              )}
 
-            {/* Feed Container */}
-            <div className="bg-surface border border-outline-variant rounded flex-1 flex flex-col">
-              <div className="p-4 border-b border-outline-variant flex justify-between items-center sticky top-0 z-10 rounded-t bg-surface">
-                <h3 className="text-title-md text-on-surface">Activity Timeline</h3>
-                <button className="px-2 py-1 text-label-sm border border-outline-variant rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors">
-                  Filter
-                </button>
-              </div>
-
-              <div className="p-4 flex-1 overflow-y-auto">
-                <div className="relative border-l border-outline-variant ml-3 pl-6 space-y-8">
-                  {timeline.map(entry => (
-                    entry.isNew ? (
-                      <div key={entry.id} className="relative animate-highlight border-l-2 -ml-[25px] pl-[23px] py-2 rounded-r">
-                        <span className="absolute -left-[29px] top-3 h-3 w-3 rounded-full bg-primary ring-4 ring-surface" />
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className="text-title-md text-on-surface flex items-center gap-2">
-                            {entry.type}
-                            <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 border border-[#22c55e] text-[#22c55e] rounded bg-[#22c55e]/10">
-                              Just Now
-                            </span>
-                          </h4>
-                          <span className="text-label-sm text-on-surface-variant">{entry.time}</span>
-                        </div>
-                        <p className="text-body-md text-on-surface-variant mb-2">{entry.note}</p>
-                        {entry.author && (
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="px-2 py-1 text-[10px] uppercase tracking-wider border border-outline-variant rounded text-on-surface-variant bg-surface-container-lowest">
-                              <span className="material-symbols-outlined text-[12px] align-middle mr-1">person</span>
-                              {entry.author}
-                            </span>
-                          </div>
+              {/* Timeline entries */}
+              <div className="relative pl-5" style={{ borderLeft: '1px solid #232327' }}>
+                {timeline.map((entry, i) => (
+                  <div key={entry.id} className={`relative ${i < timeline.length - 1 ? 'mb-7' : ''}`}>
+                    <span
+                      className="absolute top-1 w-2 h-2 rounded-full"
+                      style={{ left: -24, background: entry.fresh ? C.green : '#3a3a40' }}
+                    />
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px] font-medium text-[#ededee]">{entry.type}</span>
+                        {entry.fresh && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full tracking-[0.1em] uppercase"
+                            style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', color: C.green }}>
+                            Just now
+                          </span>
                         )}
                       </div>
-                    ) : (
-                      <div key={entry.id} className="relative">
-                        <span className="absolute -left-[29px] top-1 h-3 w-3 rounded-full border-2 border-outline-variant bg-surface" />
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className="text-title-md text-on-surface">{entry.type}</h4>
-                          <span className="text-label-sm text-on-surface-variant">{entry.time}</span>
-                        </div>
-                        <p className="text-body-sm text-on-surface-variant">{entry.note}</p>
-                      </div>
-                    )
-                  ))}
-                </div>
+                      <span className="text-[11px] text-[#5b5b62]">{entry.time}</span>
+                    </div>
+                    <p className="text-[13px] text-[#8a8a92] leading-[1.55] m-0 mb-1.5">{entry.note}</p>
+                    {entry.author && (
+                      <div className="text-[11px] text-[#5b5b62]">{entry.author}</div>
+                    )}
+                  </div>
+                ))}
               </div>
+
             </div>
           </div>
 
         </div>
+
       </main>
     </div>
   )

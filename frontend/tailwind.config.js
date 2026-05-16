@@ -67,6 +67,7 @@ export default {
         'container-padding': '24px',
       },
       fontFamily: {
+        'fraunces': ['Fraunces', '"Times New Roman"', 'serif'],
         'body-md': ['Inter', 'sans-serif'],
         'label-sm': ['Inter', 'sans-serif'],
         'label-caps': ['Inter', 'sans-serif'],

@@ -1,48 +1,76 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Sidebar from '../../components/Sidebar'
+import Reveal from '../../components/Reveal'
 import { getDnaBlueprints } from '../../services/dna.service'
+
+const C = { blue: '#60a5fa', green: '#22c55e', amber: '#f59e0b' }
 
 const MOCK_BLUEPRINTS = [
   {
-    id: '1',
-    tags: ['Fintech', 'Accelerator', 'Malaysia'],
-    industry: 'Fintech', programme_type: 'Accelerator', geography: 'Malaysia',
-    pattern_summary: 'Extracted pattern from successfully funded fintech cohorts showing 3x success rate when mentors have C-level experience.',
-    relationship_stats: { total_checkins: 12, avg_duration: 75, milestones_completed: 3 },
+    id: 'DNA-7f2a', confidence: 0.91,
+    tags: [{ label: 'fintech', geo: false }, { label: 'accelerator', geo: false }, { label: 'Malaysia', geo: true }],
+    industry: 'fintech', programmeType: 'accelerator', geography: 'Malaysia',
+    summary: 'Fintech mentors with 10+ years in banking and active investor networks consistently unlock seed-stage funding within 6 months. The pattern holds across both B2B and consumer fintech.',
+    stats: { checkins: 12, avgSession: '75m', duration: '8mo' },
+    source: 'MaGIC Cohort 6', pair: 'Ahmad Razif × FundBridge', outcome: 'Raised RM600k pre-seed',
   },
   {
-    id: '2',
-    tags: ['SaaS', 'Seed', 'Remote'],
-    industry: 'SaaS', programme_type: 'Seed', geography: 'Remote',
-    pattern_summary: 'B2B SaaS startups exhibiting a 40% reduction in churn when matching algorithm prioritizes mentors with direct competitor exit experience.',
-    relationship_stats: { total_checkins: 8, avg_duration: 45, milestones_completed: 2 },
+    id: 'DNA-3e91', confidence: 0.88,
+    tags: [{ label: 'healthtech', geo: false }, { label: 'accelerator', geo: false }, { label: 'Malaysia', geo: true }],
+    industry: 'healthtech', programmeType: 'accelerator', geography: 'Malaysia',
+    summary: 'Healthtech founders paired with regulatory-experienced mentors achieve pilot approval roughly 2× faster than peers. Early stakeholder mapping at the ministry is the dominant signal.',
+    stats: { checkins: 11, avgSession: '90m', duration: '7mo' },
+    source: 'MaGIC Cohort 6', pair: 'Nurul Huda × MediTrack', outcome: 'MOH pilot approved',
   },
   {
-    id: '3',
-    tags: ['Healthtech', 'Series A', 'US'],
-    industry: 'Healthtech', programme_type: 'Series A', geography: 'US',
-    pattern_summary: 'Regulatory compliance navigation speed increased by 60% in cohorts utilizing structured weekly asynchronous updates over live calls.',
-    relationship_stats: { total_checkins: 24, avg_duration: null, milestones_completed: 5, async: true },
+    id: 'DNA-c1d8', confidence: 0.84,
+    tags: [{ label: 'saas', geo: false }, { label: 'accelerator', geo: false }, { label: 'Malaysia', geo: true }],
+    industry: 'saas', programmeType: 'accelerator', geography: 'Malaysia',
+    summary: 'SaaS GTM frameworks transfer cleanly when mentor and startup share a target persona. Misalignment on ICP — even with strong mentor seniority — predicts cohort under-performance.',
+    stats: { checkins: 9, avgSession: '60m', duration: '5mo' },
+    source: 'MaGIC Cohort 6', pair: 'Priya Nair × DeskOps', outcome: '3 enterprise clients signed',
   },
   {
-    id: '4',
-    tags: ['EdTech', 'Pre-seed', 'Europe'],
-    industry: 'EdTech', programme_type: 'Pre-seed', geography: 'Europe',
-    pattern_summary: 'Early product-market fit validation timeline shortened by 3 months when mentors introduce direct pilot school connections in month 1.',
-    relationship_stats: { total_checkins: 6, avg_duration: 90, milestones_completed: 1 },
+    id: 'DNA-92ab', confidence: 0.79,
+    tags: [{ label: 'fintech', geo: false }, { label: 'mentorship', geo: false }, { label: 'Singapore', geo: true }],
+    industry: 'fintech', programmeType: 'mentorship', geography: 'Singapore',
+    summary: 'Cross-border fintech pairings work when the mentor has direct compliance experience in the target market. Generic seniority does not transfer across regulatory regimes.',
+    stats: { checkins: 14, avgSession: '55m', duration: '9mo' },
+    source: 'SG Fintech Bridge 2025', pair: 'Wei Lin × CrossPay', outcome: 'MAS sandbox approved',
+  },
+  {
+    id: 'DNA-5f0c', confidence: 0.76,
+    tags: [{ label: 'deeptech', geo: false }, { label: 'grant', geo: false }, { label: 'Malaysia', geo: true }],
+    industry: 'deeptech', programmeType: 'grant', geography: 'Malaysia',
+    summary: 'Deeptech founders benefit most when mentors actively reshape the technical narrative for grant reviewers. Engineering depth alone — without translation skill — correlates with grant rejection.',
+    stats: { checkins: 8, avgSession: '80m', duration: '6mo' },
+    source: 'Cradle Deeptech 2024', pair: 'Dr. Faizal × NeuroGrid', outcome: 'RM250k grant secured',
+  },
+  {
+    id: 'DNA-b403', confidence: 0.72,
+    tags: [{ label: 'e-commerce', geo: false }, { label: 'incubator', geo: false }, { label: 'Indonesia', geo: true }],
+    industry: 'e-commerce', programmeType: 'incubator', geography: 'Indonesia',
+    summary: 'For marketplace startups, mentor utility peaks during the supply-side cold start. Pairings introduced after liquidity is achieved deliver materially lower outcomes.',
+    stats: { checkins: 10, avgSession: '65m', duration: '7mo' },
+    source: 'BEKUP 2024', pair: 'Rina P. × TaniSwap', outcome: '4× GMV growth',
   },
 ]
 
-const FILTERS_CONFIG = [
-  { key: 'industry',  label: 'Industry',  opts: ['Fintech', 'SaaS', 'Healthtech', 'EdTech'] },
-  { key: 'type',      label: 'Type',       opts: ['Accelerator', 'Seed', 'Series A', 'Pre-seed'] },
-  { key: 'geography', label: 'Geography',  opts: ['Malaysia', 'Remote', 'US', 'Europe'] },
+const DNA_STATS = [
+  { label: 'Blueprints',        value: '24',  valueSuffix: null, delta: '+3 this month',       up: true  },
+  { label: 'Industries covered',value: '7',   valueSuffix: null, delta: 'Fintech leads',        up: false },
+  { label: 'Avg match boost',   value: '+18', valueSuffix: '%',  delta: 'vs embedding-only',   up: true  },
+  { label: 'Source programmes', value: '5',   valueSuffix: null, delta: '3 countries',          up: false },
 ]
 
 export default function DnaLibrary() {
+  const navigate = useNavigate()
   const [blueprints, setBlueprints] = useState(MOCK_BLUEPRINTS)
   const [search, setSearch] = useState('')
-  const [filters, setFilters] = useState({ industry: '', type: '', geography: '' })
+  const [industry, setIndustry] = useState('')
+  const [progType, setProgType] = useState('')
+  const [geography, setGeography] = useState('')
 
   useEffect(() => {
     getDnaBlueprints({}).then(d => { if (d?.length) setBlueprints(d) }).catch(() => {})
@@ -50,107 +78,163 @@ export default function DnaLibrary() {
 
   const filtered = blueprints.filter(b => {
     const q = search.toLowerCase()
-    const matchesSearch = !q || b.pattern_summary.toLowerCase().includes(q) || b.tags.some(t => t.toLowerCase().includes(q))
-    const matchesIndustry = !filters.industry || b.industry === filters.industry
-    const matchesType = !filters.type || b.programme_type === filters.type
-    const matchesGeo = !filters.geography || b.geography === filters.geography
-    return matchesSearch && matchesIndustry && matchesType && matchesGeo
+    if (q && !b.summary.toLowerCase().includes(q) && !b.tags.some(t => t.label.includes(q))) return false
+    if (industry && b.industry !== industry) return false
+    if (progType && b.programmeType !== progType) return false
+    if (geography && b.geography !== geography) return false
+    return true
   })
 
-  const statsLabel = (s) => {
-    const parts = [`${s.total_checkins} check-ins`]
-    if (s.async) parts.push('async')
-    else if (s.avg_duration) parts.push(`avg ${s.avg_duration} min`)
-    parts.push(`${s.milestones_completed} milestone${s.milestones_completed !== 1 ? 's' : ''}`)
-    return parts.join(' · ')
-  }
+  const cardBg = { background: 'linear-gradient(180deg, #18181c 0%, #131316 100%)' }
+  const eyebrow = 'text-[11px] text-[#5b5b62] tracking-[0.24em] uppercase'
+  const selectCls = 'bg-transparent border border-[#232327] rounded-xl px-3 py-2 text-[13px] text-[#8a8a92] focus:outline-none focus:border-[#3a3a40] appearance-none cursor-pointer min-w-[140px]'
 
   return (
-    <div className="bg-surface-container-lowest text-on-background h-screen flex overflow-hidden">
+    <div className="min-h-screen" style={{ background: '#0b0b0c', color: '#ededee', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      <div className="ds-bg" />
+      <div className="ds-grid" />
       <Sidebar />
-      <div className="flex-1 flex flex-col md:ml-sidebar-width h-screen overflow-hidden">
 
-        {/* Top App Bar */}
-        <header className="flex justify-between items-center h-14 w-full px-gutter bg-surface border-b border-outline-variant z-10 shrink-0">
-          <h2 className="text-title-md font-bold tracking-tight text-on-surface">DNA Library</h2>
-          <div className="flex items-center gap-4">
-            <div className="relative hidden sm:block">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="bg-surface-container-lowest border border-outline-variant text-on-surface text-body-sm rounded pl-9 pr-3 py-1.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all w-64 placeholder:text-on-surface-variant"
-                placeholder="Search patterns..."
-                type="text"
-              />
-            </div>
-            <button className="text-on-surface-variant hover:text-on-surface hover:bg-surface-container p-1.5 rounded transition-colors">
-              <span className="material-symbols-outlined text-[20px]">notifications</span>
-            </button>
-            <button className="text-on-surface-variant hover:text-on-surface hover:bg-surface-container p-1.5 rounded transition-colors">
-              <span className="material-symbols-outlined text-[20px]">settings</span>
-            </button>
-            <div className="w-8 h-8 rounded bg-surface-container-high border border-outline-variant ml-2 flex items-center justify-center">
-              <span className="material-symbols-outlined text-[18px] text-on-surface-variant">person</span>
-            </div>
+      <main className="ml-[240px] min-h-screen relative z-10 p-10 pt-12 page-enter">
+
+        {/* Page header */}
+        <header className="flex items-start justify-between mb-8">
+          <div>
+            <div className={`${eyebrow} mb-2`}>Pattern intelligence</div>
+            <h1 className="font-fraunces font-light text-[#ededee] m-0 leading-tight" style={{ fontSize: 'clamp(28px, 3vw, 40px)', letterSpacing: '-0.03em' }}>
+              DNA Library
+            </h1>
+            <p className="text-[14px] text-[#8a8a92] mt-2 m-0">
+              {blueprints.length} blueprints extracted from successful relationships. Each compounds on the next cohort's matching.
+            </p>
           </div>
+          <button className="h-9 px-4 rounded-full border border-[#2c2c32] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[13px] font-medium flex items-center gap-2 transition-colors cursor-pointer bg-transparent flex-shrink-0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export library
+          </button>
         </header>
 
-        {/* Canvas */}
-        <main className="flex-1 overflow-y-auto p-container-padding bg-surface-container-lowest">
-          <div className="max-w-[1400px] mx-auto">
-
-            {/* Filter Bar */}
-            <div className="flex flex-wrap gap-4 mb-8 items-center border-b border-surface-container pb-4">
-              {FILTERS_CONFIG.map(({ key, label, opts }) => (
-                <div key={key} className="relative">
-                  <select
-                    value={filters[key]}
-                    onChange={e => setFilters(f => ({ ...f, [key]: e.target.value }))}
-                    className="appearance-none bg-surface border border-surface-container text-on-surface text-body-sm rounded pl-3 pr-8 py-2 focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-high transition-colors"
-                  >
-                    <option value="">{label}: All</option>
-                    {opts.map(o => <option key={o} value={o}>{o}</option>)}
-                  </select>
-                  <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[16px]">expand_more</span>
-                </div>
-              ))}
-              <div className="ml-auto flex items-center gap-2">
-                <span className="text-body-sm text-on-surface-variant">{filtered.length} patterns found</span>
-                <button className="bg-surface border border-surface-container text-on-surface text-body-sm rounded px-3 py-2 hover:bg-surface-container-high transition-colors flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px]">sort</span> Sort
-                </button>
+        {/* Stats */}
+        <div className="grid grid-cols-4 gap-5 mb-6">
+          {DNA_STATS.map((s, i) => (
+            <div key={i} className="rounded-2xl border border-[#232327] p-6" style={cardBg}>
+              <div className="text-[12px] text-[#5b5b62] tracking-[0.16em] uppercase mb-3">{s.label}</div>
+              <div className="font-fraunces font-light text-[36px] leading-none tracking-[-0.03em] text-[#ededee] mb-3">
+                {s.value}
+                {s.valueSuffix && <span className="text-[24px] text-[#5b5b62]">{s.valueSuffix}</span>}
+              </div>
+              <div className="flex items-center gap-1.5 text-[12px]" style={{ color: s.up ? C.green : '#5b5b62' }}>
+                {s.up && (
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 15 12 9 18 15"/>
+                  </svg>
+                )}
+                {s.delta}
               </div>
             </div>
+          ))}
+        </div>
 
-            {/* Card Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filtered.map(b => (
-                <div key={b.id} className="hover-card-effect bg-surface border border-surface-container rounded p-5 flex flex-col cursor-pointer">
-                  <div className="flex gap-2 flex-wrap mb-4">
-                    {b.tags.map(tag => (
-                      <span key={tag} className="bg-surface-container-low border border-surface-container text-secondary text-label-sm px-2 py-0.5 rounded">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="text-body-md text-on-surface leading-relaxed flex-1">{b.pattern_summary}</p>
-                  <div className="mt-6 pt-4 border-t border-surface-container flex items-center text-body-sm text-on-surface-variant">
-                    <span className="material-symbols-outlined text-[14px] mr-1.5 opacity-70">vital_signs</span>
-                    {statsLabel(b.relationship_stats)}
-                  </div>
-                </div>
-              ))}
-              {filtered.length === 0 && (
-                <div className="col-span-full text-body-sm text-on-surface-variant text-center py-12">
-                  No patterns match the filters.
-                </div>
-              )}
-            </div>
-
+        {/* Filter bar */}
+        <Reveal><div className="flex items-center gap-3 mb-6 p-4 rounded-2xl border border-[#232327] flex-wrap" style={cardBg}>
+          <div className="flex items-center gap-2.5 flex-1 min-w-[220px] text-[#5b5b62]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search patterns… (e.g. 'regulatory mentor', 'series A handoff')"
+              className="flex-1 bg-transparent border-none outline-none text-[13px] text-[#ededee] placeholder:text-[#5b5b62]"
+            />
           </div>
-        </main>
-      </div>
+          <select value={industry} onChange={e => setIndustry(e.target.value)} className={selectCls}>
+            <option value="">All industries</option>
+            {['fintech', 'healthtech', 'saas', 'deeptech', 'e-commerce'].map(o => <option key={o} value={o} className="bg-[#131316]">{o}</option>)}
+          </select>
+          <select value={progType} onChange={e => setProgType(e.target.value)} className={selectCls}>
+            <option value="">All programmes</option>
+            {['accelerator', 'mentorship', 'grant', 'incubator'].map(o => <option key={o} value={o} className="bg-[#131316]">{o}</option>)}
+          </select>
+          <select value={geography} onChange={e => setGeography(e.target.value)} className={selectCls}>
+            <option value="">All geographies</option>
+            {['Malaysia', 'Singapore', 'Indonesia'].map(o => <option key={o} value={o} className="bg-[#131316]">{o}</option>)}
+          </select>
+        </div></Reveal>
+
+        {/* Cards grid */}
+        <Reveal delay={80}><div className="grid grid-cols-1 lg:grid-cols-2 gap-[18px]">
+          {filtered.map(b => (
+            <article
+              key={b.id}
+              className="rounded-2xl border border-[#232327] p-[22px] flex flex-col gap-4 relative overflow-hidden cursor-pointer transition-all duration-200"
+              style={cardBg}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#3a3a40'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#232327'; e.currentTarget.style.transform = '' }}
+            >
+              {/* Blue radial accent top-right */}
+              <div className="absolute top-0 right-0 w-[140px] h-[140px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(96,165,250,0.10), transparent 70%)' }} />
+
+              {/* Head */}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex gap-1.5 flex-wrap">
+                  {b.tags.map(t => (
+                    <span
+                      key={t.label}
+                      className="text-[10px] px-2 py-0.5 rounded-full border tracking-[0.08em] uppercase"
+                      style={t.geo
+                        ? { background: 'rgba(255,255,255,0.04)', borderColor: '#232327', color: '#8a8a92' }
+                        : { background: 'rgba(96,165,250,0.08)', borderColor: 'rgba(96,165,250,0.2)', color: C.blue }
+                      }
+                    >
+                      {t.label}
+                    </span>
+                  ))}
+                </div>
+                <span className="text-[10.5px] text-[#5b5b62] font-mono flex-shrink-0">{b.id} · {b.confidence} confidence</span>
+              </div>
+
+              {/* Summary */}
+              <p className="font-fraunces font-normal text-[17px] leading-[1.4] tracking-[-0.01em] text-[#ededee] m-0">{b.summary}</p>
+
+              {/* Mini stats */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { k: 'Check-ins', v: b.stats.checkins },
+                  { k: 'Avg session', v: b.stats.avgSession },
+                  { k: 'Duration', v: b.stats.duration },
+                ].map(s => (
+                  <div key={s.k}>
+                    <div className="text-[10px] text-[#5b5b62] tracking-[0.22em] uppercase">{s.k}</div>
+                    <div className="font-fraunces font-normal text-[22px] leading-[1.2] text-[#ededee] mt-0.5">{s.v}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Source */}
+              <div className="text-[12px] text-[#5b5b62] leading-relaxed border-t border-[#232327] pt-3">
+                From <strong className="text-[#8a8a92] font-medium">{b.source}</strong> · {b.pair} · {b.outcome}
+              </div>
+            </article>
+          ))}
+
+          {filtered.length === 0 && (
+            <div className="col-span-full text-center py-16 text-[#5b5b62] text-[14px]">
+              No blueprints match the current filters.
+            </div>
+          )}
+        </div></Reveal>
+
+        {filtered.length > 0 && (
+          <div className="flex justify-center mt-8">
+            <button className="h-10 px-6 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[13px] font-medium transition-colors cursor-pointer bg-transparent">
+              Load 18 more blueprints
+            </button>
+          </div>
+        )}
+      </main>
     </div>
   )
 }
