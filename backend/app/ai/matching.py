@@ -49,7 +49,7 @@ def generate_matches(startup_id, programme_id, db: Session):
     # Pre-fetch all DNA blueprints for Signal B
     all_blueprints = db.query(DNABlueprint).all()
     
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-2.5-flash")
     
     for row in result:
         mentor_id = row.user_id
