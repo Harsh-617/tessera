@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List
 from app.database import get_db
@@ -19,8 +19,6 @@ def list_links(
 ):
     if current_user.role.value == "admin":
         return db.query(Link).all()
-    
-    # Users see links they are part of
     return db.query(Link).filter(
         (Link.entity_a_id == current_user.id) | (Link.entity_b_id == current_user.id)
     ).all()
@@ -41,21 +39,15 @@ def activate_link(
     link = db.query(Link).filter(Link.id == id).first()
     if not link:
         raise HTTPException(status_code=404, detail="Link not found")
-    
     if link.status != LinkStatusEnum.proposed:
         raise HTTPException(status_code=400, detail="Only proposed links can be activated")
 
     link.status = LinkStatusEnum.active
     link.activated_at = datetime.utcnow()
-    
-    event = LinkEvent(
-        link_id=id,
-        from_status="proposed",
-        to_status="active",
-        triggered_by=TriggeredByEnum.user,
-        reason="Link activated by user"
-    )
-    db.add(event)
+    db.add(LinkEvent(
+        link_id=id, from_status="proposed", to_status="active",
+        triggered_by=TriggeredByEnum.user, reason="Link activated by user"
+    ))
     db.commit()
     db.refresh(link)
     return link
@@ -64,13 +56,13 @@ def activate_link(
 def complete_link(
     id: UUID,
     link_update: LinkUpdate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
     link = db.query(Link).filter(Link.id == id).first()
     if not link:
         raise HTTPException(status_code=404, detail="Link not found")
-    
     if link.status not in [LinkStatusEnum.active, LinkStatusEnum.at_risk]:
         raise HTTPException(status_code=400, detail="Only active or at-risk links can be completed")
 
@@ -79,18 +71,37 @@ def complete_link(
     link.outcome = link_update.outcome
     link.outcome_notes = link_update.outcome_notes
     link.completed_at = datetime.utcnow()
-    
-    event = LinkEvent(
-        link_id=id,
-        from_status=old_status,
-        to_status=link.status.value,
-        triggered_by=TriggeredByEnum.admin,
-        reason=f"Link marked {link.status.value} by admin"
-    )
-    db.add(event)
+
+    db.add(LinkEvent(
+        link_id=id, from_status=old_status, to_status=link.status.value,
+        triggered_by=TriggeredByEnum.admin, reason=f"Link marked {link.status.value} by admin"
+    ))
     db.commit()
     db.refresh(link)
-    
-    # TODO: If successful, trigger DNA extraction background task
-    
+
+    # Trigger DNA extraction if outcome is successful
+    if link_update.outcome and link_update.outcome.value == "successful":
+        from app.ai.dna import extract_dna_blueprint
+        background_tasks.add_task(extract_dna_blueprint, str(link.id), db)
+
     return link
+
+@router.get("/{id}/events")
+def get_link_events(
+    id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Returns the full audit trail for a link as a timeline."""
+    events = db.query(LinkEvent).filter(LinkEvent.link_id == id).order_by(LinkEvent.created_at.asc()).all()
+    return [
+        {
+            "id": str(e.id),
+            "from_status": e.from_status,
+            "to_status": e.to_status,
+            "triggered_by": e.triggered_by.value,
+            "reason": e.reason,
+            "created_at": e.created_at.isoformat()
+        }
+        for e in events
+    ]

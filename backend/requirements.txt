@@ -1,4 +1,4 @@
-google-generativeai
+google-genai
 pgvector
 psycopg2-binary
 sqlalchemy
@@ -8,3 +8,4 @@ fastapi
 uvicorn
 firebase-admin
 pydantic-settings
+email-validator
