@@ -304,7 +304,7 @@ Long-term features that extend the platform's scope.
 | Database | Cloud SQL — PostgreSQL + pgvector | All structured data + vector embeddings |
 | AI embeddings | Gemini API — text-embedding-004 | Profile and DNA blueprint embeddings (3072-dim) |
 | Vector search | pgvector cosine similarity | Find closest mentor embeddings to startup |
-| LLM | Gemini 1.5 Flash | Match reasoning, DNA extraction, health narratives |
+| LLM | gemini-2.5-flash | Match reasoning, DNA extraction, health narratives |
 | AI SDK | google-generativeai (Python) | Single package for all Gemini calls |
 
 ### AI/ML Libraries
@@ -504,7 +504,7 @@ Support needed: {support_needed joined}
 
 ### 10.1 Libraries
 ```
-google-generativeai    # text-embedding-004 + gemini-1.5-flash
+google-generativeai    # text-embedding-004 + gemini-2.5-flash
 pgvector               # VECTOR type for SQLAlchemy
 psycopg2-binary        # Postgres driver
 sqlalchemy             # ORM

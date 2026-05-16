@@ -83,3 +83,58 @@
 /* ── Tab crossfade ── */
 .tab-pane { transition: opacity 0.3s ease; }
 .tab-pane.fade-out { opacity: 0; }
+
+/* ── Check-in highlight ── */
+@keyframes highlightFade {
+  0%   { background-color: rgba(192, 193, 255, 0.1); border-left-color: #c0c1ff; }
+  100% { background-color: transparent; border-left-color: transparent; }
+}
+.animate-highlight { animation: highlightFade 3s ease-out forwards; }
+
+/* ── Page enter animation ── */
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: pageEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── New design system: background layers ── */
+.ds-bg {
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(1200px 600px at 50% 35%, rgba(255,255,255,0.04), transparent 60%),
+    linear-gradient(180deg, #0d0d0f 0%, #08080a 100%);
+}
+.ds-grid {
+  position: fixed; inset: 0; z-index: 1;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 30%, transparent 80%);
+  pointer-events: none;
+}
+.ds-vignette {
+  position: fixed; inset: 0; z-index: 2;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.65) 100%);
+  pointer-events: none;
+}
+
+/* ── New design system: divider ── */
+.ds-divider {
+  display: flex; align-items: center; gap: 14px;
+  color: #5b5b62;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  width: 100%;
+}
+.ds-divider::before, .ds-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #232327, transparent);
+}

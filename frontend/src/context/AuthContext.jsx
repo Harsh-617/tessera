@@ -7,9 +7,14 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [role, setRole] = useState(null)
+  const [role, setRoleState] = useState(null)
   const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
+
+  const setRole = (r) => {
+    if (r) localStorage.setItem('tessera_role', r)
+    setRoleState(r)
+  }
 
   useEffect(() => {
     if (!firebaseConfigured) {
@@ -26,7 +31,7 @@ export function AuthProvider({ children }) {
           const data = await verifyAuth(idToken)
           setRole(data.role)
         } catch {
-          setRole(null)
+          setRoleState(localStorage.getItem('tessera_role') || null)
         }
       } else {
         setUser(null)
@@ -48,7 +53,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, role, token, loading, refreshToken }}>
+    <AuthContext.Provider value={{ user, role, token, loading, refreshToken, setRole }}>
       {children}
     </AuthContext.Provider>
   )
