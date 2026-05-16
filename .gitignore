@@ -1,0 +1,29 @@
+# Environment
+.env
+*.env
+
+# Firebase credentials
+firebase_credentials.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Conda
+.conda/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
