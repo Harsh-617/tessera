@@ -2,8 +2,8 @@
 .env
 *.env
 
-# Firebase credentials
-firebase_credentials.json
+# Firebase credentials  
+backend/firebase_credentials.json
 
 # Python
 __pycache__/
@@ -22,7 +22,10 @@ build/
 
 # IDE
 .vscode/
-.idea/
+.idea/  
+
+# Antigravity
+antigravity.md
 
 # OS
 .DS_Store
