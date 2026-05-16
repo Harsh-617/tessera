@@ -3,27 +3,30 @@ import { signOut } from 'firebase/auth'
 import { auth } from '../firebase'
 import { useAuth } from '../hooks/useAuth'
 
-const NAV = {
-  admin: [
-    { label: 'Dashboard', path: '/admin/dashboard' },
-    { label: 'Programmes', path: '/admin/programmes' },
-    { label: 'Actors', path: '/admin/actors' },
-    { label: 'DNA Library', path: '/admin/dna' },
-  ],
-  mentor: [
-    { label: 'My Links', path: '/mentor' },
-    { label: 'Profile', path: '/mentor/profile' },
-  ],
-  startup: [
-    { label: 'My Links', path: '/startup' },
-    { label: 'Profile', path: '/startup/profile' },
-  ],
-}
+const ADMIN_NAV = [
+  { label: 'Dashboard', path: '/admin/dashboard', icon: 'dashboard' },
+  { label: 'Mentors', path: '/admin/actors', icon: 'diversity_3' },
+  { label: 'Startups', path: '/admin/actors', icon: 'rocket_launch' },
+  { label: 'Matches', path: '/admin/programmes', icon: 'handshake' },
+  { label: 'Analytics', path: '/admin/dna', icon: 'analytics' },
+]
+
+const MENTOR_NAV = [
+  { label: 'My Links', path: '/mentor', icon: 'handshake' },
+  { label: 'Profile', path: '/mentor/profile', icon: 'person' },
+]
+
+const STARTUP_NAV = [
+  { label: 'My Links', path: '/startup', icon: 'handshake' },
+  { label: 'Profile', path: '/startup/profile', icon: 'person' },
+]
+
+const NAV_BY_ROLE = { admin: ADMIN_NAV, mentor: MENTOR_NAV, startup: STARTUP_NAV }
 
 export default function Sidebar() {
-  const { role, user } = useAuth()
+  const { role } = useAuth()
   const navigate = useNavigate()
-  const links = NAV[role] ?? []
+  const links = NAV_BY_ROLE[role] ?? []
 
   const handleSignOut = async () => {
     await signOut(auth)
@@ -31,53 +34,51 @@ export default function Sidebar() {
   }
 
   return (
-    <aside style={{
-      width: 220, minHeight: '100vh', background: '#18181b',
-      color: '#fff', display: 'flex', flexDirection: 'column',
-      padding: '24px 0', flexShrink: 0,
-    }}>
-      <div style={{ padding: '0 24px', marginBottom: 32 }}>
-        <div style={{ fontWeight: 800, fontSize: 20, letterSpacing: -0.5, color: '#a5b4fc' }}>
-          tessera
-        </div>
-        <div style={{ fontSize: 11, color: '#71717a', marginTop: 2, textTransform: 'uppercase', letterSpacing: 1 }}>
-          {role}
-        </div>
+    <nav className="fixed left-0 top-0 h-full w-sidebar-width bg-surface-container-lowest border-r border-outline-variant flex flex-col gap-element-gap py-container-padding z-20">
+      <div className="px-4 mb-4">
+        <h1 className="text-title-lg font-black text-on-background tracking-tighter">tessera</h1>
+        <p className="text-label-sm text-on-surface-variant mt-1">AI Mentor Hub</p>
       </div>
 
-      <nav style={{ flex: 1 }}>
-        {links.map(({ label, path }) => (
+      <div className="flex-1 flex flex-col gap-1 px-2">
+        {links.map(({ label, path, icon }) => (
           <NavLink
-            key={path} to={path}
-            style={({ isActive }) => ({
-              display: 'block', padding: '10px 24px',
-              color: isActive ? '#a5b4fc' : '#a1a1aa',
-              background: isActive ? 'rgba(99,102,241,0.12)' : 'transparent',
-              textDecoration: 'none', fontSize: 14, fontWeight: isActive ? 600 : 400,
-              borderLeft: isActive ? '3px solid #6366f1' : '3px solid transparent',
-              transition: 'all 0.15s',
-            })}
+            key={label}
+            to={path}
+            className={({ isActive }) =>
+              isActive
+                ? 'bg-surface-container-high text-on-surface border-l-2 border-primary font-title-md flex items-center px-4 py-2 rounded-r'
+                : 'text-on-surface-variant hover:text-on-surface flex items-center px-4 py-2 text-body-md hover:bg-surface-container transition-all duration-150 rounded'
+            }
           >
-            {label}
+            {({ isActive }) => (
+              <>
+                <span
+                  className="material-symbols-outlined mr-3 text-[20px]"
+                  style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}
+                >
+                  {icon}
+                </span>
+                {label}
+              </>
+            )}
           </NavLink>
         ))}
-      </nav>
+      </div>
 
-      <div style={{ padding: '16px 24px', borderTop: '1px solid #27272a' }}>
-        <div style={{ fontSize: 13, color: '#a1a1aa', marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {user?.email}
-        </div>
+      <div className="mt-auto px-2 flex flex-col gap-1">
+        <a className="text-on-surface-variant hover:text-on-surface flex items-center px-4 py-2 text-body-md hover:bg-surface-container transition-all duration-150 rounded cursor-pointer">
+          <span className="material-symbols-outlined mr-3 text-[20px]">help</span>
+          Help
+        </a>
         <button
           onClick={handleSignOut}
-          style={{
-            width: '100%', padding: '7px 0', borderRadius: 8,
-            background: 'transparent', color: '#71717a',
-            border: '1px solid #27272a', fontSize: 13, cursor: 'pointer',
-          }}
+          className="text-on-surface-variant hover:text-on-surface flex items-center px-4 py-2 text-body-md hover:bg-surface-container transition-all duration-150 rounded w-full text-left"
         >
-          Sign out
+          <span className="material-symbols-outlined mr-3 text-[20px]">logout</span>
+          Logout
         </button>
       </div>
-    </aside>
+    </nav>
   )
 }

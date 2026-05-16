@@ -25,7 +25,11 @@ import StartupProfile from './pages/startup/Profile'
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, role, loading } = useAuth()
-  if (loading) return <div>Loading…</div>
+  if (loading) return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <span className="text-body-sm text-on-surface-variant">Loading…</span>
+    </div>
+  )
   if (!user) return <Navigate to="/login" replace />
   if (allowedRoles && !allowedRoles.includes(role)) return <Navigate to="/" replace />
   return children
@@ -42,15 +46,12 @@ function RoleHome() {
 export default function App() {
   return (
     <Routes>
-      {/* Public */}
       <Route path="/login" element={<Login />} />
       <Route path="/role-selection" element={<RoleSelection />} />
 
-      {/* Onboarding */}
       <Route path="/onboarding/mentor" element={<ProtectedRoute allowedRoles={['mentor']}><MentorSetup /></ProtectedRoute>} />
       <Route path="/onboarding/startup" element={<ProtectedRoute allowedRoles={['startup']}><StartupSetup /></ProtectedRoute>} />
 
-      {/* Admin */}
       <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Dashboard /></ProtectedRoute>} />
       <Route path="/admin/match/:programmeId" element={<ProtectedRoute allowedRoles={['admin']}><MatchExplorer /></ProtectedRoute>} />
       <Route path="/admin/links/:id" element={<ProtectedRoute allowedRoles={['admin']}><AdminLinkDetail /></ProtectedRoute>} />
@@ -60,17 +61,14 @@ export default function App() {
       <Route path="/admin/dna" element={<ProtectedRoute allowedRoles={['admin']}><DnaLibrary /></ProtectedRoute>} />
       <Route path="/admin/actors" element={<ProtectedRoute allowedRoles={['admin']}><Actors /></ProtectedRoute>} />
 
-      {/* Mentor */}
       <Route path="/mentor" element={<ProtectedRoute allowedRoles={['mentor']}><MentorHome /></ProtectedRoute>} />
       <Route path="/mentor/links/:id" element={<ProtectedRoute allowedRoles={['mentor']}><MentorLinkDetail /></ProtectedRoute>} />
       <Route path="/mentor/profile" element={<ProtectedRoute allowedRoles={['mentor']}><MentorProfile /></ProtectedRoute>} />
 
-      {/* Startup */}
       <Route path="/startup" element={<ProtectedRoute allowedRoles={['startup']}><StartupHome /></ProtectedRoute>} />
       <Route path="/startup/links/:id" element={<ProtectedRoute allowedRoles={['startup']}><StartupLinkDetail /></ProtectedRoute>} />
       <Route path="/startup/profile" element={<ProtectedRoute allowedRoles={['startup']}><StartupProfile /></ProtectedRoute>} />
 
-      {/* Root redirect based on role */}
       <Route path="/" element={<ProtectedRoute><RoleHome /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
