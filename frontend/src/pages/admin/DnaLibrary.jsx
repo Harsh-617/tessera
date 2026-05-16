@@ -4,85 +4,153 @@ import { getDnaBlueprints } from '../../services/dna.service'
 
 const MOCK_BLUEPRINTS = [
   {
-    id: '1', industry: 'Fintech', programme_type: 'accelerator', geography: 'Malaysia',
-    pattern_summary: 'Mentor with deep investor network in local fintech ecosystem paired with pre-seed startup seeking institutional funding. Weekly structured sessions focused on investor narrative and warm introductions.',
+    id: '1',
+    tags: ['Fintech', 'Accelerator', 'Malaysia'],
+    industry: 'Fintech', programme_type: 'Accelerator', geography: 'Malaysia',
+    pattern_summary: 'Extracted pattern from successfully funded fintech cohorts showing 3x success rate when mentors have C-level experience.',
     relationship_stats: { total_checkins: 12, avg_duration: 75, milestones_completed: 3 },
   },
   {
-    id: '2', industry: 'SaaS', programme_type: 'accelerator', geography: 'Malaysia',
-    pattern_summary: 'Product-focused mentor from a regional super-app paired with B2B SaaS startup at GTM stage. Mentor applied a structured customer discovery framework that led to 3 enterprise pilots.',
-    relationship_stats: { total_checkins: 9, avg_duration: 60, milestones_completed: 2 },
+    id: '2',
+    tags: ['SaaS', 'Seed', 'Remote'],
+    industry: 'SaaS', programme_type: 'Seed', geography: 'Remote',
+    pattern_summary: 'B2B SaaS startups exhibiting a 40% reduction in churn when matching algorithm prioritizes mentors with direct competitor exit experience.',
+    relationship_stats: { total_checkins: 8, avg_duration: 45, milestones_completed: 2 },
   },
   {
-    id: '3', industry: 'Healthtech', programme_type: 'accelerator', geography: 'Malaysia',
-    pattern_summary: 'Former healthcare ministry consultant mentoring a digital health startup through regulatory approval. Deep domain knowledge of MOH processes was the critical differentiator.',
-    relationship_stats: { total_checkins: 11, avg_duration: 90, milestones_completed: 3 },
+    id: '3',
+    tags: ['Healthtech', 'Series A', 'US'],
+    industry: 'Healthtech', programme_type: 'Series A', geography: 'US',
+    pattern_summary: 'Regulatory compliance navigation speed increased by 60% in cohorts utilizing structured weekly asynchronous updates over live calls.',
+    relationship_stats: { total_checkins: 24, avg_duration: null, milestones_completed: 5, async: true },
   },
+  {
+    id: '4',
+    tags: ['EdTech', 'Pre-seed', 'Europe'],
+    industry: 'EdTech', programme_type: 'Pre-seed', geography: 'Europe',
+    pattern_summary: 'Early product-market fit validation timeline shortened by 3 months when mentors introduce direct pilot school connections in month 1.',
+    relationship_stats: { total_checkins: 6, avg_duration: 90, milestones_completed: 1 },
+  },
+]
+
+const FILTERS_CONFIG = [
+  { key: 'industry',  label: 'Industry',  opts: ['Fintech', 'SaaS', 'Healthtech', 'EdTech'] },
+  { key: 'type',      label: 'Type',       opts: ['Accelerator', 'Seed', 'Series A', 'Pre-seed'] },
+  { key: 'geography', label: 'Geography',  opts: ['Malaysia', 'Remote', 'US', 'Europe'] },
 ]
 
 export default function DnaLibrary() {
   const [blueprints, setBlueprints] = useState(MOCK_BLUEPRINTS)
-  const [filters, setFilters] = useState({ industry: '', programme_type: '', geography: '' })
+  const [search, setSearch] = useState('')
+  const [filters, setFilters] = useState({ industry: '', type: '', geography: '' })
 
   useEffect(() => {
-    getDnaBlueprints(filters).then(d => { if (d?.length) setBlueprints(d) }).catch(() => {})
-  }, [filters])
+    getDnaBlueprints({}).then(d => { if (d?.length) setBlueprints(d) }).catch(() => {})
+  }, [])
 
-  const setFilter = (k, v) => setFilters(f => ({ ...f, [k]: v }))
+  const filtered = blueprints.filter(b => {
+    const q = search.toLowerCase()
+    const matchesSearch = !q || b.pattern_summary.toLowerCase().includes(q) || b.tags.some(t => t.toLowerCase().includes(q))
+    const matchesIndustry = !filters.industry || b.industry === filters.industry
+    const matchesType = !filters.type || b.programme_type === filters.type
+    const matchesGeo = !filters.geography || b.geography === filters.geography
+    return matchesSearch && matchesIndustry && matchesType && matchesGeo
+  })
 
-  const filtered = blueprints.filter(b =>
-    (!filters.industry || b.industry === filters.industry) &&
-    (!filters.programme_type || b.programme_type === filters.programme_type) &&
-    (!filters.geography || b.geography === filters.geography)
-  )
+  const statsLabel = (s) => {
+    const parts = [`${s.total_checkins} check-ins`]
+    if (s.async) parts.push('async')
+    else if (s.avg_duration) parts.push(`avg ${s.avg_duration} min`)
+    parts.push(`${s.milestones_completed} milestone${s.milestones_completed !== 1 ? 's' : ''}`)
+    return parts.join(' · ')
+  }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f9fafb' }}>
+    <div className="bg-surface-container-lowest text-on-background h-screen flex overflow-hidden">
       <Sidebar />
-      <main style={{ flex: 1, padding: '40px 48px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>DNA Library</h1>
-        <p style={{ color: '#6b7280', marginBottom: 28, fontSize: 14 }}>
-          Reusable success patterns extracted from completed mentor-startup relationships.
-        </p>
+      <div className="flex-1 flex flex-col md:ml-sidebar-width h-screen overflow-hidden">
 
-        <div style={{ display: 'flex', gap: 14, marginBottom: 28 }}>
-          {[
-            { k: 'industry', label: 'Industry', opts: ['Fintech', 'SaaS', 'Healthtech', 'Deeptech', 'E-commerce', 'Agritech'] },
-            { k: 'programme_type', label: 'Type', opts: ['accelerator', 'mentorship', 'grant', 'incubator'] },
-            { k: 'geography', label: 'Geography', opts: ['Malaysia', 'Singapore', 'Indonesia'] },
-          ].map(({ k, label, opts }) => (
-            <select
-              key={k} value={filters[k]} onChange={e => setFilter(k, e.target.value)}
-              style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, background: '#fff' }}
-            >
-              <option value="">All {label}</option>
-              {opts.map(o => <option key={o} value={o}>{o}</option>)}
-            </select>
-          ))}
-          <button onClick={() => setFilters({ industry: '', programme_type: '', geography: '' })} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid #d1d5db', background: '#fff', fontSize: 13, cursor: 'pointer', color: '#6b7280' }}>Clear</button>
-        </div>
+        {/* Top App Bar */}
+        <header className="flex justify-between items-center h-14 w-full px-gutter bg-surface border-b border-outline-variant z-10 shrink-0">
+          <h2 className="text-title-md font-bold tracking-tight text-on-surface">DNA Library</h2>
+          <div className="flex items-center gap-4">
+            <div className="relative hidden sm:block">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="bg-surface-container-lowest border border-outline-variant text-on-surface text-body-sm rounded pl-9 pr-3 py-1.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all w-64 placeholder:text-on-surface-variant"
+                placeholder="Search patterns..."
+                type="text"
+              />
+            </div>
+            <button className="text-on-surface-variant hover:text-on-surface hover:bg-surface-container p-1.5 rounded transition-colors">
+              <span className="material-symbols-outlined text-[20px]">notifications</span>
+            </button>
+            <button className="text-on-surface-variant hover:text-on-surface hover:bg-surface-container p-1.5 rounded transition-colors">
+              <span className="material-symbols-outlined text-[20px]">settings</span>
+            </button>
+            <div className="w-8 h-8 rounded bg-surface-container-high border border-outline-variant ml-2 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[18px] text-on-surface-variant">person</span>
+            </div>
+          </div>
+        </header>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
-          {filtered.map(b => (
-            <div key={b.id} style={{ background: '#fff', borderRadius: 14, padding: 24, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid #e5e7eb' }}>
-              <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-                <span style={{ padding: '3px 10px', borderRadius: 9999, background: '#eff6ff', color: '#3b82f6', fontSize: 11, fontWeight: 700 }}>{b.industry}</span>
-                <span style={{ padding: '3px 10px', borderRadius: 9999, background: '#f0fdf4', color: '#16a34a', fontSize: 11, fontWeight: 700 }}>{b.programme_type}</span>
-                <span style={{ padding: '3px 10px', borderRadius: 9999, background: '#fef9c3', color: '#ca8a04', fontSize: 11, fontWeight: 700 }}>{b.geography}</span>
-              </div>
-              <p style={{ fontSize: 13, color: '#374151', lineHeight: 1.6, marginBottom: 16 }}>
-                {b.pattern_summary?.slice(0, 200)}…
-              </p>
-              <div style={{ display: 'flex', gap: 20, fontSize: 12, color: '#9ca3af' }}>
-                <span>{b.relationship_stats?.total_checkins} check-ins</span>
-                <span>avg {b.relationship_stats?.avg_duration} min</span>
-                <span>{b.relationship_stats?.milestones_completed} milestones</span>
+        {/* Canvas */}
+        <main className="flex-1 overflow-y-auto p-container-padding bg-surface-container-lowest">
+          <div className="max-w-[1400px] mx-auto">
+
+            {/* Filter Bar */}
+            <div className="flex flex-wrap gap-4 mb-8 items-center border-b border-surface-container pb-4">
+              {FILTERS_CONFIG.map(({ key, label, opts }) => (
+                <div key={key} className="relative">
+                  <select
+                    value={filters[key]}
+                    onChange={e => setFilters(f => ({ ...f, [key]: e.target.value }))}
+                    className="appearance-none bg-surface border border-surface-container text-on-surface text-body-sm rounded pl-3 pr-8 py-2 focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-high transition-colors"
+                  >
+                    <option value="">{label}: All</option>
+                    {opts.map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                  <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[16px]">expand_more</span>
+                </div>
+              ))}
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-body-sm text-on-surface-variant">{filtered.length} patterns found</span>
+                <button className="bg-surface border border-surface-container text-on-surface text-body-sm rounded px-3 py-2 hover:bg-surface-container-high transition-colors flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[16px]">sort</span> Sort
+                </button>
               </div>
             </div>
-          ))}
-          {filtered.length === 0 && <div style={{ color: '#9ca3af', fontSize: 14 }}>No blueprints match the filters.</div>}
-        </div>
-      </main>
+
+            {/* Card Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filtered.map(b => (
+                <div key={b.id} className="hover-card-effect bg-surface border border-surface-container rounded p-5 flex flex-col cursor-pointer">
+                  <div className="flex gap-2 flex-wrap mb-4">
+                    {b.tags.map(tag => (
+                      <span key={tag} className="bg-surface-container-low border border-surface-container text-secondary text-label-sm px-2 py-0.5 rounded">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-body-md text-on-surface leading-relaxed flex-1">{b.pattern_summary}</p>
+                  <div className="mt-6 pt-4 border-t border-surface-container flex items-center text-body-sm text-on-surface-variant">
+                    <span className="material-symbols-outlined text-[14px] mr-1.5 opacity-70">vital_signs</span>
+                    {statsLabel(b.relationship_stats)}
+                  </div>
+                </div>
+              ))}
+              {filtered.length === 0 && (
+                <div className="col-span-full text-body-sm text-on-surface-variant text-center py-12">
+                  No patterns match the filters.
+                </div>
+              )}
+            </div>
+
+          </div>
+        </main>
+      </div>
     </div>
   )
 }

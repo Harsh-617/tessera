@@ -9,6 +9,7 @@ import StartupSetup from './pages/onboarding/StartupSetup'
 import Dashboard from './pages/admin/Dashboard'
 import MatchExplorer from './pages/admin/MatchExplorer'
 import AdminLinkDetail from './pages/admin/LinkDetail'
+import AdminCheckIn from './pages/admin/CheckIn'
 import Programmes from './pages/admin/Programmes'
 import ProgrammeDetail from './pages/admin/ProgrammeDetail'
 import ProgrammeSetup from './pages/admin/ProgrammeSetup'
@@ -55,6 +56,7 @@ export default function App() {
       <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Dashboard /></ProtectedRoute>} />
       <Route path="/admin/match/:programmeId" element={<ProtectedRoute allowedRoles={['admin']}><MatchExplorer /></ProtectedRoute>} />
       <Route path="/admin/links/:id" element={<ProtectedRoute allowedRoles={['admin']}><AdminLinkDetail /></ProtectedRoute>} />
+      <Route path="/admin/links/:id/checkin" element={<ProtectedRoute allowedRoles={['admin']}><AdminCheckIn /></ProtectedRoute>} />
       <Route path="/admin/programmes" element={<ProtectedRoute allowedRoles={['admin']}><Programmes /></ProtectedRoute>} />
       <Route path="/admin/programmes/new" element={<ProtectedRoute allowedRoles={['admin']}><ProgrammeSetup /></ProtectedRoute>} />
       <Route path="/admin/programmes/:id" element={<ProtectedRoute allowedRoles={['admin']}><ProgrammeDetail /></ProtectedRoute>} />

@@ -83,3 +83,10 @@
 /* ── Tab crossfade ── */
 .tab-pane { transition: opacity 0.3s ease; }
 .tab-pane.fade-out { opacity: 0; }
+
+/* ── Check-in highlight ── */
+@keyframes highlightFade {
+  0%   { background-color: rgba(192, 193, 255, 0.1); border-left-color: #c0c1ff; }
+  100% { background-color: transparent; border-left-color: transparent; }
+}
+.animate-highlight { animation: highlightFade 3s ease-out forwards; }
