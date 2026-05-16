@@ -1,0 +1,10 @@
+google-generativeai
+pgvector
+psycopg2-binary
+sqlalchemy
+numpy
+python-dotenv
+fastapi
+uvicorn
+firebase-admin
+pydantic-settings
