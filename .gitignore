@@ -22,7 +22,10 @@ build/
 
 # IDE
 .vscode/
-.idea/  
+.idea/
+
+# Claude Code
+.claude/
 
 # Antigravity
 antigravity.md
