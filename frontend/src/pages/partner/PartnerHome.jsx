@@ -71,10 +71,19 @@ function StatusBadge({ status }) {
 export default function PartnerHome() {
   const navigate = useNavigate()
   const [portfolio] = useState(MOCK_PORTFOLIO)
+  const [toast, setToast] = useState(null)
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000) }
   const cardBg = { background: 'linear-gradient(180deg, #18181c 0%, #131316 100%)' }
 
   return (
     <div className="min-h-screen" style={{ background: '#0b0b0c', color: '#ededee', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      {toast && (
+        <div className="fixed top-5 right-5 z-50 px-4 py-3 rounded-xl border border-[#232327] text-[#ededee] text-[13px] flex items-center gap-3"
+          style={{ background: 'linear-gradient(180deg, #18181c 0%, #131316 100%)', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
+          {toast}
+          <button onClick={() => setToast(null)} className="text-[#5b5b62] hover:text-[#ededee] bg-transparent border-0 cursor-pointer ml-1">✕</button>
+        </div>
+      )}
       <div className="ds-bg" />
       <div className="ds-grid" />
       <Sidebar />
@@ -238,6 +247,7 @@ export default function PartnerHome() {
                   <div className="text-[12px] text-[#5b5b62] mt-0.5">{item.sub}</div>
                 </div>
                 <button
+                  onClick={() => showToast(`${item.title} — details coming soon.`)}
                   className="h-7 px-3.5 rounded-full text-[11px] font-medium cursor-pointer border-0 transition-colors"
                   style={item.urgent
                     ? { background: '#ededee', color: '#0b0b0c' }

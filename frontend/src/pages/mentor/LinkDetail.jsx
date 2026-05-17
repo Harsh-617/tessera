@@ -273,8 +273,10 @@ export default function MentorLinkDetail() {
                   )
                 })}
               </div>
-              <button className="mt-3.5 h-7 px-3.5 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] text-[11px] transition-colors cursor-pointer bg-transparent">
-                + Add milestone
+              <button
+                onClick={() => setTab('checkin')}
+                className="mt-3.5 h-7 px-3.5 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] text-[11px] transition-colors cursor-pointer bg-transparent">
+                + Log check-in
               </button>
             </div>
           </div>

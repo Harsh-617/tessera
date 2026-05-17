@@ -34,9 +34,21 @@ const PROFILE_STATUS = {
 const INDUSTRIES = ['Fintech', 'Healthtech', 'SaaS', 'Deeptech', 'Agritech', 'E-commerce']
 const COUNTRIES  = ['Malaysia', 'Singapore', 'Indonesia']
 
+function Toast({ msg, onClose }) {
+  return (
+    <div className="fixed top-5 right-5 z-50 px-4 py-3 rounded-xl border border-[#232327] text-[#ededee] text-[13px] flex items-center gap-3"
+      style={{ background: 'linear-gradient(180deg, #18181c 0%, #131316 100%)', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
+      {msg}
+      <button onClick={onClose} className="text-[#5b5b62] hover:text-[#ededee] bg-transparent border-0 cursor-pointer ml-1">✕</button>
+    </div>
+  )
+}
+
 export default function Actors() {
   const navigate = useNavigate()
   const [actors, setActors] = useState(MOCK_ACTORS)
+  const [toast, setToast] = useState(null)
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000) }
   const [tab, setTab]       = useState('all')
   const [search, setSearch] = useState('')
   const [industry, setIndustry] = useState('')
@@ -80,6 +92,7 @@ export default function Actors() {
 
   return (
     <div className="min-h-screen" style={{ background: '#0b0b0c', color: '#ededee', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
       <div className="ds-bg" />
       <div className="ds-grid" />
       <Sidebar />
@@ -98,10 +111,14 @@ export default function Actors() {
             </p>
           </div>
           <div className="flex gap-2.5 flex-shrink-0">
-            <button className="h-9 px-4 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[13px] font-medium transition-colors cursor-pointer bg-transparent">
+            <button
+              onClick={() => showToast('Invitation email sent.')}
+              className="h-9 px-4 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[13px] font-medium transition-colors cursor-pointer bg-transparent">
               Invite by email
             </button>
-            <button className="h-9 px-4 rounded-full text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer border-0"
+            <button
+              onClick={() => navigate('/role-selection')}
+              className="h-9 px-4 rounded-full text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer border-0"
               style={{ background: '#ededee', color: '#0b0b0c' }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>

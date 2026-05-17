@@ -162,11 +162,14 @@ export default function LinkDetail() {
             </p>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0 ml-8">
-            <button className="h-9 px-4 rounded-full border border-[#2c2c32] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[13px] font-medium flex items-center gap-2 transition-colors cursor-pointer bg-transparent">
+            <button
+              onClick={() => setLink(l => ({ ...l, status: 'at_risk' }))}
+              className="h-9 px-4 rounded-full border border-[#2c2c32] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[13px] font-medium flex items-center gap-2 transition-colors cursor-pointer bg-transparent">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               Mark at risk
             </button>
             <button
+              onClick={() => setLink(l => ({ ...l, status: 'completed' }))}
               className="h-9 px-4 rounded-full text-[#0b0b0c] text-[13px] font-medium transition-colors cursor-pointer border-0"
               style={{ background: '#ededee' }}
               onMouseEnter={e => e.currentTarget.style.background = '#fff'}

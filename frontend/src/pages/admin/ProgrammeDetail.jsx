@@ -125,7 +125,9 @@ export default function ProgrammeDetail() {
             </div>
           </div>
           <div className="flex gap-2.5 flex-shrink-0">
-            <button className="h-9 px-4 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[13px] font-medium transition-colors cursor-pointer bg-transparent">
+            <button
+              onClick={() => setTab('settings')}
+              className="h-9 px-4 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[13px] font-medium transition-colors cursor-pointer bg-transparent">
               Edit programme
             </button>
             <button
@@ -215,7 +217,9 @@ export default function ProgrammeDetail() {
                 <h3 className="font-fraunces font-normal text-[18px] text-[#ededee] m-0" style={{ letterSpacing: '-0.01em' }}>
                   Mentors · {(actors.mentors ?? MOCK_MENTORS).length}
                 </h3>
-                <button className="h-7 px-3 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[11px] transition-colors cursor-pointer bg-transparent">
+                <button
+                  onClick={() => navigate('/admin/actors')}
+                  className="h-7 px-3 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[11px] transition-colors cursor-pointer bg-transparent">
                   Enroll mentor
                 </button>
               </div>
@@ -228,7 +232,9 @@ export default function ProgrammeDetail() {
                 <h3 className="font-fraunces font-normal text-[18px] text-[#ededee] m-0" style={{ letterSpacing: '-0.01em' }}>
                   Startups · {(actors.startups ?? MOCK_STARTUPS).length}
                 </h3>
-                <button className="h-7 px-3 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[11px] transition-colors cursor-pointer bg-transparent">
+                <button
+                  onClick={() => navigate('/admin/actors')}
+                  className="h-7 px-3 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[11px] transition-colors cursor-pointer bg-transparent">
                   Enroll startup
                 </button>
               </div>
@@ -260,7 +266,7 @@ export default function ProgrammeDetail() {
                   return (
                     <tr
                       key={l.id}
-                      onClick={() => navigate('/admin/links/mock')}
+                      onClick={() => navigate(`/admin/links/${l.id}`)}
                       className="cursor-pointer transition-colors"
                       style={{
                         borderBottom: i < MOCK_LINKS.length - 1 ? '1px solid #232327' : 'none',
@@ -323,11 +329,15 @@ export default function ProgrammeDetail() {
             <div className="mt-6 pt-5 border-t border-[#232327]">
               <div className="text-[11px] text-[#ef4444] tracking-[0.16em] uppercase mb-3">Danger zone</div>
               <div className="flex gap-2.5">
-                <button className="h-8 px-3.5 rounded-full text-[12px] font-medium cursor-pointer border-0 transition-colors"
+                <button
+                  onClick={() => { if (window.confirm('Archive this programme? This cannot be undone.')) setProgramme(p => ({ ...p, status: 'completed' })) }}
+                  className="h-8 px-3.5 rounded-full text-[12px] font-medium cursor-pointer border-0 transition-colors"
                   style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}>
                   Archive programme
                 </button>
-                <button className="h-8 px-3.5 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[12px] transition-colors cursor-pointer bg-transparent">
+                <button
+                  onClick={() => setProgramme(p => ({ ...p, status: 'completed' }))}
+                  className="h-8 px-3.5 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[12px] transition-colors cursor-pointer bg-transparent">
                   Mark as completed
                 </button>
               </div>

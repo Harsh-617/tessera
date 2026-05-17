@@ -71,6 +71,8 @@ export default function DnaLibrary() {
   const [industry, setIndustry] = useState('')
   const [progType, setProgType] = useState('')
   const [geography, setGeography] = useState('')
+  const [toast, setToast] = useState(null)
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000) }
 
   useEffect(() => {
     getDnaBlueprints({}).then(d => { if (d?.length) setBlueprints(d) }).catch(() => {})
@@ -91,6 +93,13 @@ export default function DnaLibrary() {
 
   return (
     <div className="min-h-screen" style={{ background: '#0b0b0c', color: '#ededee', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      {toast && (
+        <div className="fixed top-5 right-5 z-50 px-4 py-3 rounded-xl border border-[#232327] text-[#ededee] text-[13px] flex items-center gap-3"
+          style={{ background: 'linear-gradient(180deg, #18181c 0%, #131316 100%)', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
+          {toast}
+          <button onClick={() => setToast(null)} className="text-[#5b5b62] hover:text-[#ededee] bg-transparent border-0 cursor-pointer ml-1">✕</button>
+        </div>
+      )}
       <div className="ds-bg" />
       <div className="ds-grid" />
       <Sidebar />
@@ -108,7 +117,14 @@ export default function DnaLibrary() {
               {blueprints.length} blueprints extracted from successful relationships. Each compounds on the next cohort's matching.
             </p>
           </div>
-          <button className="h-9 px-4 rounded-full border border-[#2c2c32] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[13px] font-medium flex items-center gap-2 transition-colors cursor-pointer bg-transparent flex-shrink-0">
+          <button
+            onClick={() => {
+              const blob = new Blob([JSON.stringify(blueprints, null, 2)], { type: 'application/json' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a'); a.href = url; a.download = 'tessera-dna-library.json'; a.click()
+              URL.revokeObjectURL(url)
+            }}
+            className="h-9 px-4 rounded-full border border-[#2c2c32] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[13px] font-medium flex items-center gap-2 transition-colors cursor-pointer bg-transparent flex-shrink-0">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
@@ -230,7 +246,9 @@ export default function DnaLibrary() {
 
         {filtered.length > 0 && (
           <div className="flex justify-center mt-8">
-            <button className="h-10 px-6 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[13px] font-medium transition-colors cursor-pointer bg-transparent">
+            <button
+            onClick={() => showToast('All blueprints loaded — no more available.')}
+            className="h-10 px-6 rounded-full border border-[#232327] text-[#8a8a92] hover:text-[#ededee] hover:border-[#3a3a40] text-[13px] font-medium transition-colors cursor-pointer bg-transparent">
               Load 18 more blueprints
             </button>
           </div>
